@@ -1,7 +1,7 @@
 /**
  * @file      SHA256.cpp
- * @brief     SHA256�Í����N���X
- * @note      SHA256�A���S���Y���ňÍ������s���܂��B
+ * @brief     SHA256暗号化クラス
+ * @note      SHA256アルゴリズムで暗号化を行います。
  * @author    Yoshiteru Ishida
  * @copyright Copyright 2021 Yoshiteru Ishida
  */
@@ -14,75 +14,75 @@
 #define MESSAGE_BLOCK_SIZE 64
 
 /**
-	�p�f�B���O����
+	パディング処理
 
-	�������e�F���̓f�[�^��64�o�C�g���Ƃɕ������A�Ō�̃u���b�N�Ƀr�b�g����ǉ����܂��B
-	�u���b�N�͓��I�Ƀ��������m�ۂ��܂��B�u���b�N���g�p���I������烁�������J������K�v������܂��B
+	処理内容：入力データを64バイトごとに分割し、最後のブロックにビット数を追加します。
+	ブロックは動的にメモリを確保します。ブロックを使用し終わったらメモリを開放する必要があります。
 
-	�����F���̓f�[�^
-	�߂�l�F�u���b�N�z��
+	引数：入力データ
+	戻り値：ブロック配列
 */
 unsigned char** SHA256::padding(char* input) {
 
-	//	���̓f�[�^�̒������擾����
+	//	入力データの長さを取得する
 	int intLength = strlen(input);
 
-	//	�U�蕪����u���b�N�̌����v�Z����
-	//	(MESSAGE_BLOCK_SIZE-1)�͐؂�グ�̂��߂ɕK�v
+	//	振り分けるブロックの個数を計算する
+	//	(MESSAGE_BLOCK_SIZE-1)は切り上げのために必要
 	int intBlock = (intLength + 9 + (MESSAGE_BLOCK_SIZE - 1)) / MESSAGE_BLOCK_SIZE;
 	std::cout << "block:" << intBlock << std::endl;
 
-	//	�u���b�N�����̃|�C���^���m�ۂ���
+	//	ブロック個数分のポインタを確保する
 	unsigned char** output = (unsigned char**)malloc(sizeof(char*) * (intBlock + 1));
 
 	int intP = 0;
 	for (int intI = 0; intI < intBlock; intI++) {
 
-		//	�u���b�N�����̃��������m�ۂ���
+		//	ブロック個数分のメモリを確保する
 		output[intI] = (unsigned char*)malloc(sizeof(char) * MESSAGE_BLOCK_SIZE);
 
-		//	�R�s�[���钷�����v�Z����
+		//	コピーする長さを計算する
 		int intCopyLength = intLength - intP;
 
-		//	�R�s�[���钷�����u���b�N���𒴂���ꍇ�̓u���b�N����ݒ肷��
+		//	コピーする長さがブロック長を超える場合はブロック長を設定する
 		if (intCopyLength > MESSAGE_BLOCK_SIZE) {
 			intCopyLength = MESSAGE_BLOCK_SIZE;
 		}
 		else {
-			//	�R�s�[���钷�����}�C�i�X�̏ꍇ��0�Ƃ���
+			//	コピーする長さがマイナスの場合は0とする
 			if (intCopyLength < 0) {
 				intCopyLength = 0;
 			}
 		}
 
-		//	�R�s�[���钷�����u���b�N���Z���ꍇ
+		//	コピーする長さがブロックより短い場合
 		if (intCopyLength < MESSAGE_BLOCK_SIZE) {
-			//	�u���b�N���N���A����
+			//	ブロックをクリアする
 			memset(output[intI], NULL, sizeof(char) * MESSAGE_BLOCK_SIZE);
 		}
 
-		//	���̓f�[�^���R�s�[����ꍇ
+		//	入力データをコピーする場合
 		if (intCopyLength > 0) {
-			//	���ۂɃf�[�^���R�s�[����
+			//	実際にデータをコピーする
 			memcpy(output[intI], &input[intP], sizeof(char) * intCopyLength);
 
-			//	�R�s�[�������������b�Z�[�W�u���b�N��菬�����ꍇ�̓R�s�[����������̏I�[��0x80������
+			//	コピーした長さがメッセージブロックより小さい場合はコピーした文字列の終端に0x80を入れる
 			if (intCopyLength < MESSAGE_BLOCK_SIZE) {
 				output[intI][intCopyLength] = 0x80;
 			}
 		}
 
-		//	���̓f�[�^���R�s�[���Ȃ��ꍇ
+		//	入力データをコピーしない場合
 		else {
-			//	���̓f�[�^�̒�����MESSAGE_BLOCK_SIZE�Ŋ���؂��ꍇ��0x80��ǉ��ł��Ă��Ȃ����ߍŌ�̃u���b�N�̐擪�ɒǉ�����
+			//	入力データの長さがMESSAGE_BLOCK_SIZEで割り切れる場合は0x80を追加できていないため最後のブロックの先頭に追加する
 			if (intLength % MESSAGE_BLOCK_SIZE == 0) {
 				output[intI][0] = 0x80;
 			}
 		}
 
-		//	�Ō�̃u���b�N�̏ꍇ
+		//	最後のブロックの場合
 		if (intI == intBlock - 1) {
-			//	�Ō�̂S�o�C�g�ɕ����񒷁i�r�b�g�j������
+			//	最後の４バイトに文字列長（ビット）を入れる
 			int intBitLength = intLength * 8;
 
 			std::cout << "bit:" << intBitLength << std::endl;
@@ -95,7 +95,7 @@ unsigned char** SHA256::padding(char* input) {
 		intP = intP + MESSAGE_BLOCK_SIZE;
 	}
 
-	//	�u���b�N�z��̍Ō��NULL������
+	//	ブロック配列の最後にNULLを入れる
 	output[intBlock] = NULL;
 
 	std::cout << std::endl;
