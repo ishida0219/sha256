@@ -20,6 +20,16 @@ int main()
 	//	ブロックを表示
 	sha256.print_block(result);
 
+	//	結果格納配列を作成する
+	unsigned int H[INIT_HASH_LENGTH];
+
+	//	暗号化を行う
+	sha256.compute(result, H);
+
+	//	結果を出力する
+	std::cout << "result:" << std::endl;
+	sha256.print_hash(H);
+
 	//	メモリ開放
 	sha256.free_block(result);
 
