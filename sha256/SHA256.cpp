@@ -30,7 +30,7 @@ unsigned char** SHA256::padding(char* input) {
 	//	振り分けるブロックの個数を計算する
 	//	(MESSAGE_BLOCK_SIZE-1)は切り上げのために必要
 	int intBlock = (intLength + 9 + (MESSAGE_BLOCK_SIZE - 1)) / MESSAGE_BLOCK_SIZE;
-	std::cout << "block:" << intBlock << std::endl;
+	//	std::cout << "block:" << intBlock << std::endl;
 
 	//	ブロック個数分のポインタを確保する
 	unsigned char** output = (unsigned char**)malloc(sizeof(char*) * (intBlock + 1));
@@ -85,7 +85,7 @@ unsigned char** SHA256::padding(char* input) {
 			//	最後の４バイトに文字列長（ビット）を入れる
 			int intBitLength = intLength * 8;
 
-			std::cout << "bit:" << intBitLength << std::endl;
+			//	std::cout << "bit:" << intBitLength << std::endl;
 			output[intI][MESSAGE_BLOCK_SIZE - 4] = (unsigned char)(intBitLength >> 24 & (unsigned char)0xff);
 			output[intI][MESSAGE_BLOCK_SIZE - 3] = (unsigned char)(intBitLength >> 16 & (unsigned char)0xff);
 			output[intI][MESSAGE_BLOCK_SIZE - 2] = (unsigned char)(intBitLength >> 8 & (unsigned char)0xff);
@@ -98,7 +98,7 @@ unsigned char** SHA256::padding(char* input) {
 	//	ブロック配列の最後にNULLを入れる
 	output[intBlock] = NULL;
 
-	std::cout << std::endl;
+	//	std::cout << std::endl;
 
 	return output;
 }
@@ -199,8 +199,6 @@ void SHA256::print_bin(unsigned int i) {
 
 void SHA256::compute(unsigned char** block, unsigned int* H) {
 
-	std::cout << "sha256_cpu" << std::endl;
-
 	//	メッセージの個数をカウントする
 	int N = 0;
 	while (block[N] != NULL) {
@@ -217,60 +215,18 @@ void SHA256::compute(unsigned char** block, unsigned int* H) {
 		//	変数定義
 		unsigned int a, b, c, d, e, f, g, h, s0, s1, T1, T2;
 
-		std::cout << std::dec << i << std::endl;
-
 		//	1. Prepare the message schedule, { Wt }:
 		char* msg = (char*)block[i];
-		print_block_one(block[i]);
 
 		for (int t = 0; t < MESSAGE_BLOCK_SIZE; t++) {
 			if (t < 16) {
 				int p = t * 4;
-				std::cout << std::dec << "+++" << p << std::endl;
-				print_bin(msg[p] << 24);
-				std::cout << std::endl;
-				print_bin(msg[p + 1] << 16);
-				std::cout << std::endl;
-				print_bin(msg[p + 2] << 8);
-				std::cout << std::endl;
-				print_bin(msg[p + 3]);
-				std::cout << std::endl;
-
 				W[t] = (unsigned int)((msg[p] & 0xff) << 24) | (unsigned int)((msg[p + 1] & 0xff) << 16) | (unsigned int)((msg[p + 2] & 0xff) << 8) | (unsigned int)(msg[p + 3] & 0xff);
-				print_bin(W[t]);
-				std::cout << std::endl;
 			}
 			else {
-
-				std::cout << std::dec << "---" << t << std::endl;
-
-				print_bin(W[(t - 2)]);
-				std::cout << std::endl;
-
-				print_bin(ROTR(W[(t - 2)], 17));
-				std::cout << std::endl;
-
-				print_bin(ROTR(W[(t - 2)], 19));
-				std::cout << std::endl;
-
-				print_bin(SHR(W[(t - 2)], 10));
-				std::cout << std::endl;
-
 				W[t] = sigma1(W[(t - 2)]) + W[(t - 7)] + sigma0(W[(t - 15)]) + W[(t - 16)];
-
-				print_bin(W[t]);
-				std::cout << std::endl;
-
 			}
 		}
-
-		std::cout << "W:" << std::endl;
-		for (int t = 0; t < MESSAGE_BLOCK_SIZE; t++) {
-			std::cout << std::setw(2) << std::setfill('0') << std::dec << t << ":";
-			print_bin(W[t]);
-			std::cout << std::endl;
-		}
-		std::cout << std::endl;
 
 		//	2. Initialize the eight working variables, a, b, c, d, e, f, g, and h, with the (i-1)st hash value:
 		a = H[0];
@@ -284,8 +240,6 @@ void SHA256::compute(unsigned char** block, unsigned int* H) {
 
 		//	3. For t=0 to 63:
 		for (int t = 0; t < MESSAGE_BLOCK_SIZE; t++) {
-
-
 			T1 = h + SIGMA1(e) + Ch(e, f, g) + K[t] + W[t];
 			T2 = SIGMA0(a) + Maj(a, b, c);
 
