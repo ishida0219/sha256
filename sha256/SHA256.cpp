@@ -197,6 +197,16 @@ void SHA256::print_bin(unsigned int i) {
 	}
 }
 
+/**
+	SHA256暗号化処理
+
+	処理内容：パディングされたメッセージブロックを受け取って暗号化処理を行い
+	暗号化処理結果を返却します。
+
+	引数：メッセージブロック（パティング処理の戻り値）
+	　　　暗号化処理結果を格納する整数の配列（３２個分）
+	戻り値：なし
+*/
 void SHA256::compute(unsigned char** block, unsigned int* H) {
 
 	//	メッセージの個数をカウントする
@@ -210,7 +220,7 @@ void SHA256::compute(unsigned char** block, unsigned int* H) {
 	//	Hを初期化する
 	memcpy(H, H0, sizeof(int) * INIT_HASH_LENGTH);
 
-	//	メッセージ数分ループする
+	//	6.2.2 SHA-256 Hash Computation
 	for (int i = 0; i < N; i++) {
 		//	変数定義
 		unsigned int a, b, c, d, e, f, g, h, s0, s1, T1, T2;

@@ -9,6 +9,7 @@
 #define MESSAGE_BLOCK_SIZE 64
 #define INIT_HASH_LENGTH 8
 
+//	4.1.2 SHA-224 and SHA-256 Functions
 #define ROTR(x,n)   ((x >> n | x << (32 -n)))
 #define SHR(x,n)    ((x >> n))
 #define Ch(x,y,z)   ((x & y) ^ (~x & z))
@@ -18,6 +19,7 @@
 #define sigma0(x)   ((ROTR(x,  7) ^ ROTR(x, 18) ^  SHR(x,  3)))
 #define sigma1(x)   ((ROTR(x, 17) ^ ROTR(x, 19) ^  SHR(x, 10)))
 
+//	4.2.2 SHA-224 and SHA-256 Constants
 const unsigned int K[64] = {
 	0x428a2f98UL, 0x71374491UL, 0xb5c0fbcfUL, 0xe9b5dba5UL, 0x3956c25bUL, 0x59f111f1UL, 0x923f82a4UL, 0xab1c5ed5UL,
 	0xd807aa98UL, 0x12835b01UL, 0x243185beUL, 0x550c7dc3UL, 0x72be5d74UL, 0x80deb1feUL, 0x9bdc06a7UL, 0xc19bf174UL,
@@ -29,6 +31,7 @@ const unsigned int K[64] = {
 	0x748f82eeUL, 0x78a5636fUL, 0x84c87814UL, 0x8cc70208UL, 0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL
 };
 
+//	5.3.3 SHA-256
 const unsigned int H0[] = {
 	0x6a09e667UL, 0xbb67ae85UL, 0x3c6ef372UL, 0xa54ff53aUL, 0x510e527fUL, 0x9b05688cUL, 0x1f83d9abUL, 0x5be0cd19UL
 };
